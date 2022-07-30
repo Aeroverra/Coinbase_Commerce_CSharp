@@ -20,9 +20,9 @@ namespace Coinbase.Commerce
         {
             Key = apiKey;
         }
-        private RestRequest GetRequest(Method method, Object body = null)
+        private RestRequest GetRequest(Object body = null)
         {
-            var request = new RestRequest(method);
+            var request = new RestRequest();
             request.AddHeader("X-CC-Api-Key", Key);
             request.AddHeader("X-CC-Version", Version);
             if (body != null)
@@ -43,8 +43,8 @@ namespace Coinbase.Commerce
         public async Task<Response<Charge>> CreateChargeAsync(CreateCharge charge)
         {
             var client = new RestClient("https://api.commerce.coinbase.com/charges");
-            var request = GetRequest(Method.POST, charge);
-            var response = await client.ExecuteAsync(request);
+            var request = GetRequest(charge);
+            var response = await client.ExecutePostAsync(request);
             return JsonConvert.DeserializeObject<Response<Charge>>(response.Content);
         }
 
@@ -57,11 +57,11 @@ namespace Coinbase.Commerce
         public async Task<Response<Charge>> GetChargeAsync(String id)
         {
             var client = new RestClient($"https://api.commerce.coinbase.com/charges/{id}");
-            var request = GetRequest(Method.GET);
-            var response = await client.ExecuteAsync(request);
+            var request = GetRequest();
+            var response = await client.GetAsync(request);
             return JsonConvert.DeserializeObject<Response<Charge>>(response.Content);
         }
-       
+
         /// <summary>
         /// Cancels a charge that has been previously created.
         /// Supply the unique charge code that was returned when the charge was created.
@@ -71,8 +71,8 @@ namespace Coinbase.Commerce
         public async Task<Response<Charge>> CancelChargeAsync(String id)
         {
             var client = new RestClient($"https://api.commerce.coinbase.com/charges/{id}/cancel");
-            var request = GetRequest(Method.POST);
-            var response = await client.ExecuteAsync(request);
+            var request = GetRequest();
+            var response = await client.PostAsync(request);
             return JsonConvert.DeserializeObject<Response<Charge>>(response.Content);
         }
 
@@ -85,8 +85,8 @@ namespace Coinbase.Commerce
         public async Task<Response<Charge>> ResolveChargeAsync(String id)
         {
             var client = new RestClient($"https://api.commerce.coinbase.com/charges/{id}/resolve");
-            var request = GetRequest(Method.POST);
-            var response = await client.ExecuteAsync(request);
+            var request = GetRequest();
+            var response = await client.PostAsync(request);
             return JsonConvert.DeserializeObject<Response<Charge>>(response.Content);
         }
 
@@ -104,12 +104,12 @@ namespace Coinbase.Commerce
         public async Task<PagedResponse<Charge>> ListChargesAsync(ListOrder? listOrder = null, int? limit = null, string startingAfter = null, string endingBefore = null)
         {
             var client = new RestClient($"https://api.commerce.coinbase.com/charges");
-            var request = GetRequest(Method.GET);
+            var request = GetRequest();
             request.AddQueryParameter("order", $"{listOrder}");
             request.AddQueryParameter("limit", $"{limit}");
             request.AddQueryParameter("starting_after", $"{startingAfter}");
             request.AddQueryParameter("ending_before", $"{endingBefore}");
-            var response = await client.ExecuteAsync(request);
+            var response = await client.GetAsync(request);
             return JsonConvert.DeserializeObject<PagedResponse<Charge>>(response.Content);
         }
     }
